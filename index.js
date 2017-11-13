@@ -45,15 +45,14 @@ class Dungeon {
     }
   }
 
-  generatePaths() {
+  forEachPath(iteratorFunc) {
     const self = this;
-    const paths = [];
     const visited = {};
 
     helper(this.startX, this.startY, this.endX, this.endY, []);
 
     function helper(currX, currY, endX, endY, path) {
-      if (currX === endX && currY === endY) paths.push(path.slice(0));
+      if (currX === endX && currY === endY) iteratorFunc(path.slice(0));
       else {
         setVisited(currX, currY);
         //visit all valid neighbors
@@ -65,19 +64,19 @@ class Dungeon {
         }
         //up
         if (isValid(currX, currY - 1)) {
-          path.push('down');
+          path.push('up');
           helper(currX, currY - 1, endX, endY, path);
           path.pop();
         }
         //right
         if (isValid(currX + 1, currY)) {
-          path.push('down');
+          path.push('right');
           helper(currX + 1, currY, endX, endY, path);
           path.pop();
         }
         //left
         if (isValid(currX - 1, currY)) {
-          path.push('down');
+          path.push('left');
           helper(currX - 1, currY, endX, endY, path);
           path.pop();
         }
@@ -102,6 +101,8 @@ class Dungeon {
       else return true;
     }
 
+
+
   }
 }
 
@@ -111,10 +112,66 @@ class Fidel {
     this.y = y;
     this.health = 2;
     this.maxHealth = 2;
-    this.poisonedHealth = 0;
+    this.poison = 0;
     this.coins = 0;
     this.exp = 0;
     this.killChain = 0;
+    this.dead = false;
+  }
+
+  getPoisoned() {
+    if (this.poison === this.maxHealth) this.dead = true;
+    else {
+      this.poison++;
+      if (this.maxHealth - this.poison < this.health) this.health--;
+    }
+  }
+
+  isDead() {
+    return this.dead;
+  }
+
+  healthPack() {
+    this.health = this.maxHealth - this.poison;
+  }
+
+  coin() {
+    this.coins++;
+  }
+
+  heal() {
+    if (this.health < this.maxHealth - this.poison) this.health++;
+  }
+
+  damage(num) {
+    this.health -= num;
+    if (this.health < 0) this.dead = true;
+  }
+
+  interact(thing) {
+    switch(thing) {
+      case 'coin':
+        this.interact_coin();
+        break;
+      case 'spider':
+        this.interact_spider();
+        break;
+    }
+  }
+
+  interact_coin() {
+    this.coin += 1;
+    this.killChain = 0;
+  }
+
+  interact_nothing() {
+    this.killChain = 0;
+  }
+
+  interact_spider() {
+    this.damage(1);
+    this.killChain += 1;
+    this.exp += this.killChain >= 3 ? 3 : 1;
   }
 }
 
