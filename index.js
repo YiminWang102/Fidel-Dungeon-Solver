@@ -38,9 +38,11 @@ class Dungeon {
 
   populate(dungeon) {
     //make sure dungeon is same dim;
+    this.cells = [];
     for (let i = 0; i < dungeon.length; i++) {
+      this.cells.push([]);
       for (let j = 0; j < dungeon[i].length; j++) {
-        this.dungeon[i][j] = dungeon[i][j];
+        this.cells[i][j] = cells[i][j];
       }
     }
   }
@@ -172,6 +174,49 @@ class Fidel {
     this.damage(1);
     this.killChain += 1;
     this.exp += this.killChain >= 3 ? 3 : 1;
+  }
+
+  compareTo(otherFidel) {
+    if (this.exp > otherFidel.exp) return 1;
+    else if (this.exp < otherFidel.exp) return -1;
+    else if (this.coins > otherFidel.coins) return 1;
+    else if (this.coins < otherFidel.coins) return -1;
+    else return 0;
+  }
+
+  start(dungeon) {
+    this.x = dungeon.startX;
+    this.y = dungeon.startY;
+  }
+
+  makeMove(move) {
+    console.log('making move', move);
+  }
+}
+
+class DungeonSolver {
+  constructor(dungeon) {
+    this.dungeon = new Dungeon();
+    if (dungeon) this.dungeon.populate(dungeon);
+
+    this.strategy = 'default';
+  }
+
+  bruteForce() {
+    let bestFidel = new Fidel();
+    this.dungeon.forEachPath(path => {
+      const tempFidel = new Fidel();
+      traverse(tempFidel, path, this.dungeon);
+      if (bestFidel.compareTo(tempFidel) > 0) bestFidel = tempFidel;
+    });
+  }
+
+  traverse(fidel, path, dungeon) {
+    //TODO
+    fidel.start(dungeon);
+    path.forEach(move => {
+      fidel.makeMove(move);
+    });
   }
 }
 
